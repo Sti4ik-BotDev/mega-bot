@@ -1,5 +1,7 @@
 'use strict';
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
@@ -105,9 +107,14 @@ const PAGE = 7;
 
 // ========== МЕНЮ ==========
 function mainMenuKbd(userId) {
+  const miniAppUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+    : 'https://mega-bot-production.up.railway.app'; // fallback
+  
   // Меню для Мартина
   if (userId === MARTIN_ID) {
     return {inline_keyboard:[
+      [{text:'🌐 Открыть веб-версию', web_app: {url: miniAppUrl}}],
       [{text:'💼 Мой бизнес', callback_data:'MENU_BUSINESS'}],
       [{text:'🏡 Дом', callback_data:'MENU_HOME'}],
       [{text:'🤖 Kiro AI', callback_data:'MENU_AI'}],
@@ -118,6 +125,7 @@ function mainMenuKbd(userId) {
   // Меню для Лены
   if (userId === LENA_ID) {
     return {inline_keyboard:[
+      [{text:'🌐 Открыть веб-версию', web_app: {url: miniAppUrl}}],
       [{text:'📚 Учёба', callback_data:'MENU_STUDY'}],
       [{text:'📝 Заметки', callback_data:'MENU_NOTES'}],
       [{text:'📂 Задания', callback_data:'MENU_TASKS'}],
@@ -127,6 +135,7 @@ function mainMenuKbd(userId) {
   
   // Для остальных - базовое меню
   return {inline_keyboard:[
+    [{text:'🌐 Открыть веб-версию', web_app: {url: miniAppUrl}}],
     [{text:'💼 Мой бизнес', callback_data:'MENU_BUSINESS'}],
     [{text:'📚 Учёба', callback_data:'MENU_STUDY'}],
     [{text:'🏡 Дом', callback_data:'MENU_HOME'}],
@@ -903,3 +912,74 @@ if(!schedule) {
 } else {
   console.log('✅ Расписание загружено (' + (schedule.schedule ? schedule.schedule.length : 0) + ' пар)');
 }
+
+// ========== ВЕБ-СЕРВЕР ДЛЯ MINI APP ==========
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Статические файлы Mini App
+app.use(express.static(path.join(__dirname, 'miniapp/family_space_miniapp')));
+
+// API: Расписание для Лены
+app.get('/api/schedule', (req, res) => {
+  const scheduleData = loadScheduleData();
+  if (!scheduleData || !scheduleData.schedule) {
+    return res.json({ schedule: [] });
+  }
+  
+  // Преобразуем в формат Mini App
+  const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+  const formatted = days.map((day, index) => {
+    const lessons = scheduleParser.getScheduleForDay(scheduleData, day);
+    return {
+      day: day.substring(0, 2).toUpperCase(),
+      date: String(18 + index), // Упрощённо
+      classes: lessons.map(l => ({
+        time: l.time,
+        title: l.subject,
+        kind: 'lecture', // По умолчанию
+        teacher: l.teacher,
+        room: l.room,
+        detail: `${l.subject} · ${l.teacher}`
+      }))
+    };
+  });
+  
+  res.json({ schedule: formatted });
+});
+
+// API: Задания для Лены
+app.get('/api/tasks', (req, res) => {
+  // Пока возвращаем демо-данные
+  res.json({
+    tasks: [
+      {id: 1, title: "Курсач по химии", due: "2026-12-01", progress: 60, done: false, type: "course"},
+      {id: 2, title: "Лабораторная работа", due: "2026-11-25", progress: 30, done: false, type: "course"}
+    ]
+  });
+});
+
+// API: Клиенты для Мартина
+app.get('/api/clients', (req, res) => {
+  const clients = loadClients();
+  res.json({ clients: clients.slice(0, 10) }); // Первые 10
+});
+
+// API: Определение пользователя
+app.get('/api/user/:id', (req, res) => {
+  const userId = parseInt(req.params.id);
+  if (userId === MARTIN_ID) {
+    res.json({ name: 'Мартин', role: 'martin' });
+  } else if (userId === LENA_ID) {
+    res.json({ name: 'Лена', role: 'lena' });
+  } else {
+    res.json({ name: 'Гость', role: 'guest' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌐 Веб-сервер запущен на порту ${PORT}`);
+  console.log(`📱 Mini App доступен по адресу: http://localhost:${PORT}`);
+});

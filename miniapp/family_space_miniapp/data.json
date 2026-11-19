@@ -1,0 +1,191 @@
+{
+  "family": {
+    "martin": {
+      "name": "Мартин",
+      "greeting": "Привет, Мартин! 👋",
+      "subtitle": "Пусть дела идут легко",
+      "avatar": "М",
+      "accent": "coral"
+    },
+    "lena": {
+      "name": "Лена",
+      "greeting": "Привет, Лена! 🌸",
+      "subtitle": "Сегодня — хороший день для новых знаний",
+      "avatar": "Л",
+      "accent": "mint"
+    }
+  },
+  "martin": [
+    {
+      "id": "business",
+      "title": "Мой бизнес",
+      "icon": "briefcase-business",
+      "subtitle": "15 активных клиентов",
+      "gradient": "business",
+      "href": "#"
+    },
+    {
+      "id": "home",
+      "title": "Наш дом",
+      "icon": "house",
+      "subtitle": "3 задачи, 5 покупок",
+      "gradient": "home",
+      "href": "#"
+    },
+    {
+      "id": "kiro",
+      "title": "Kiro AI",
+      "icon": "bot",
+      "subtitle": "Твой AI помощник",
+      "gradient": "ai",
+      "href": "#"
+    }
+  ],
+  "lena": [
+    {
+      "id": "study",
+      "title": "Моя учёба",
+      "icon": "book-open",
+      "subtitle": "4 пары сегодня",
+      "gradient": "study",
+      "href": "schedule.html"
+    },
+    {
+      "id": "notes",
+      "title": "Заметки",
+      "icon": "notebook-pen",
+      "subtitle": "12 заметок",
+      "gradient": "notes",
+      "href": "#"
+    },
+    {
+      "id": "tasks",
+      "title": "Задания",
+      "icon": "folder-kanban",
+      "subtitle": "2 курсача в процессе",
+      "gradient": "tasks",
+      "href": "tasks.html"
+    },
+    {
+      "id": "home",
+      "title": "Наш дом",
+      "icon": "house",
+      "subtitle": "Общие дела и покупки",
+      "gradient": "home",
+      "href": "#"
+    }
+  ],
+  "schedule": [
+    {
+      "day": "ПН",
+      "date": "18",
+      "classes": [
+        {
+          "time": "09:00–10:30",
+          "title": "Социология",
+          "kind": "lecture",
+          "teacher": "И. В. Крылова",
+          "room": "214",
+          "detail": "Лекция · Основы социальной структуры"
+        }
+      ]
+    },
+    {
+      "day": "ВТ",
+      "date": "19",
+      "classes": [
+        {
+          "time": "10:40–12:10",
+          "title": "Академическое письмо",
+          "kind": "practice",
+          "teacher": "М. А. Орлова",
+          "room": "305",
+          "detail": "Практика · Работа с источниками"
+        },
+        {
+          "time": "13:00–14:30",
+          "title": "История искусства",
+          "kind": "lecture",
+          "teacher": "А. Н. Волков",
+          "room": "118",
+          "detail": "Лекция · Искусство XX века"
+        }
+      ]
+    },
+    {
+      "day": "СР",
+      "date": "20",
+      "classes": [
+        {
+          "time": "12:20–13:50",
+          "title": "Методы исследования",
+          "kind": "lab",
+          "teacher": "Е. П. Смирнова",
+          "room": "Лаб. 2",
+          "detail": "Лабораторная · Анализ данных"
+        }
+      ]
+    },
+    {
+      "day": "ЧТ",
+      "date": "21",
+      "classes": []
+    },
+    {
+      "day": "ПТ",
+      "date": "22",
+      "classes": [
+        {
+          "time": "09:00–10:30",
+          "title": "Философия",
+          "kind": "lecture",
+          "teacher": "Д. И. Петров",
+          "room": "402",
+          "detail": "Лекция · Современная философия"
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Курсовая: медиакультура",
+      "due": "2026-11-23",
+      "progress": 65,
+      "done": false,
+      "type": "course"
+    },
+    {
+      "id": 2,
+      "title": "Подготовить список литературы",
+      "due": "2026-11-21",
+      "progress": 40,
+      "done": false,
+      "type": "course"
+    },
+    {
+      "id": 3,
+      "title": "Презентация по социологии",
+      "due": "2026-11-27",
+      "progress": 80,
+      "done": false,
+      "type": "project"
+    },
+    {
+      "id": 4,
+      "title": "Конспект лекции",
+      "due": "2026-11-18",
+      "progress": 100,
+      "done": true,
+      "type": "project"
+    },
+    {
+      "id": 5,
+      "title": "Оформить титульный лист",
+      "due": "2026-11-30",
+      "progress": 20,
+      "done": false,
+      "type": "course"
+    }
+  ]
+}
