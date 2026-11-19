@@ -370,14 +370,34 @@ window.addReminder = async () => {
     if (!text) return;
     
     const forWho = prompt('Для кого? (Мартин/Лена)', 'Мартин');
+    if (!forWho) return;
+    
     const from = prompt('От кого?', forWho === 'Мартин' ? 'Лена' : 'Мартин');
-    const time = prompt('Дата и время (YYYY-MM-DDTHH:MM)', new Date().toISOString().slice(0, 16));
+    if (!from) return;
+    
+    const daysStr = prompt('Через сколько дней? (0 = сегодня, 1 = завтра, 2 = послезавтра...)', '0');
+    if (daysStr === null) return;
+    const days = parseInt(daysStr) || 0;
+    
+    const timeStr = prompt('Во сколько? (формат: ЧЧ:ММ, например 14:30)', '12:00');
+    if (!timeStr) return;
+    
+    // Создаём дату
+    const reminderDate = new Date();
+    reminderDate.setDate(reminderDate.getDate() + days);
+    const [hours, minutes] = timeStr.split(':').map(n => parseInt(n) || 0);
+    reminderDate.setHours(hours, minutes, 0, 0);
     
     haptic();
     await fetch(`${API_BASE}/api/reminders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, for: forWho, from, time: time + ':00Z' })
+      body: JSON.stringify({ 
+        text, 
+        for: forWho, 
+        from, 
+        time: reminderDate.toISOString()
+      })
     });
     
     const data = await fetch(`${API_BASE}/api/reminders`).then(r => r.json());
