@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.log
+bot_log.txt
+leads-sent.json
+current_schedule.xlsx

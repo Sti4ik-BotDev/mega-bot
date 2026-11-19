@@ -1,0 +1,20 @@
+{
+  "name": "mega-bot",
+  "version": "1.0.0",
+  "description": "Telegram мега-бот: Бизнес + Учёба + Дом",
+  "main": "mega-bot.js",
+  "scripts": {
+    "start": "node mega-bot.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "xlsx": "^0.18.5",
+    "node-cron": "^3.0.3"
+  },
+  "keywords": ["telegram", "bot", "schedule"],
+  "author": "",
+  "license": "ISC"
+}
