@@ -80,7 +80,7 @@ function parseSchedule(filePath, targetGroup) {
       
       const subject = row[groupColIndex];
       const teacher = (i + 1 < data.length) ? data[i + 1][groupColIndex] : '';
-      const room = row[groupColIndex + 1];
+      const room = row[groupColIndex + 3]; // Кабинет на +3 колонки от группы
       
       if (subject && subject !== '' && subject !== 'Преподаватель') {
         schedule.push({

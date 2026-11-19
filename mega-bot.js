@@ -29,6 +29,10 @@ if (!config.TOKEN) {
 }
 console.log('✅ TOKEN загружен:', config.TOKEN.substring(0, 10) + '...');
 
+// Пользователи
+const MARTIN_ID = 881304735;
+const LENA_ID = 5092397904;
+
 // Файлы данных
 const CLIENTS_FILE = path.join(__dirname, 'clients.json');
 const SHOPPING_FILE = path.join(__dirname, 'shopping.json');
@@ -100,13 +104,33 @@ const STATUS_MAP = { JD:'ЖДЁМ', WK:'В РАБОТЕ', SL:'ПРОДАНО', N
 const PAGE = 7;
 
 // ========== МЕНЮ ==========
-function mainMenuKbd() {
+function mainMenuKbd(userId) {
+  // Меню для Мартина
+  if (userId === MARTIN_ID) {
+    return {inline_keyboard:[
+      [{text:'💼 Мой бизнес', callback_data:'MENU_BUSINESS'}],
+      [{text:'🏡 Дом', callback_data:'MENU_HOME'}],
+      [{text:'🤖 Kiro AI', callback_data:'MENU_AI'}],
+      [{text:'📊 Статистика', callback_data:'STATS_ALL'}]
+    ]};
+  }
+  
+  // Меню для Лены
+  if (userId === LENA_ID) {
+    return {inline_keyboard:[
+      [{text:'📚 Учёба', callback_data:'MENU_STUDY'}],
+      [{text:'📝 Заметки', callback_data:'MENU_NOTES'}],
+      [{text:'📂 Задания', callback_data:'MENU_TASKS'}],
+      [{text:'🏡 Дом', callback_data:'MENU_HOME'}]
+    ]};
+  }
+  
+  // Для остальных - базовое меню
   return {inline_keyboard:[
     [{text:'💼 Мой бизнес', callback_data:'MENU_BUSINESS'}],
     [{text:'📚 Учёба', callback_data:'MENU_STUDY'}],
     [{text:'🏡 Дом', callback_data:'MENU_HOME'}],
-    [{text:'🤖 Kiro AI', callback_data:'MENU_AI'}],
-    [{text:'📊 Статистика', callback_data:'STATS_ALL'}]
+    [{text:'🤖 Kiro AI', callback_data:'MENU_AI'}]
   ]};
 }
 
@@ -141,8 +165,38 @@ function studyMenuKbd() {
   return {inline_keyboard:[
     [{text:'📅 Расписание на сегодня', callback_data:'SCHEDULE_TODAY'}],
     [{text:'📅 Расписание на завтра', callback_data:'SCHEDULE_TOMORROW'}],
+    [{text:'🗓 Выбрать день недели', callback_data:'SCHEDULE_CHOOSE_DAY'}],
     [{text:'📅 Расписание на неделю', callback_data:'SCHEDULE_WEEK'}],
     [{text:'🔄 Обновить расписание', callback_data:'SCHEDULE_UPDATE'}],
+    [{text:'🏠 Главное меню', callback_data:'MENU'}]
+  ]};
+}
+
+function daysMenuKbd() {
+  return {inline_keyboard:[
+    [{text:'Понедельник', callback_data:'SCHEDULE_DAY_Понедельник'}],
+    [{text:'Вторник', callback_data:'SCHEDULE_DAY_Вторник'}],
+    [{text:'Среда', callback_data:'SCHEDULE_DAY_Среда'}],
+    [{text:'Четверг', callback_data:'SCHEDULE_DAY_Четверг'}],
+    [{text:'Пятница', callback_data:'SCHEDULE_DAY_Пятница'}],
+    [{text:'Суббота', callback_data:'SCHEDULE_DAY_Суббота'}],
+    [{text:'← Назад', callback_data:'STUDY'}]
+  ]};
+}
+
+function notesMenuKbd() {
+  return {inline_keyboard:[
+    [{text:'📝 Все заметки', callback_data:'NOTES_LIST'}],
+    [{text:'➕ Добавить заметку', callback_data:'NOTES_ADD'}],
+    [{text:'🏠 Главное меню', callback_data:'MENU'}]
+  ]};
+}
+
+function tasksMenuKbd() {
+  return {inline_keyboard:[
+    [{text:'📋 Курсачи', callback_data:'TASKS_COURSEWORK'}],
+    [{text:'📁 Проекты', callback_data:'TASKS_PROJECTS'}],
+    [{text:'➕ Добавить задание', callback_data:'TASKS_ADD'}],
     [{text:'🏠 Главное меню', callback_data:'MENU'}]
   ]};
 }
@@ -446,10 +500,11 @@ function edit(cid, mid, text, kbd){
 
 // ========== КОМАНДЫ ==========
 bot.onText(/\/start|\/menu/, msg => {
+  const userId = msg.from.id;
   const text = '🏠 *Главное меню*\n\n💼 Бизнес | 📚 Учёба | 🏡 Дом | 🤖 AI';
   bot.sendMessage(msg.chat.id, text, {
     parse_mode:'Markdown',
-    reply_markup: mainMenuKbd()
+    reply_markup: mainMenuKbd(userId)
   });
 });
 
@@ -459,10 +514,11 @@ bot.on('callback_query', async q => {
   const cid = q.message.chat.id;
   const mid = q.message.message_id;
   const d = q.data;
+  const userId = q.from.id;
 
   // ГЛАВНОЕ МЕНЮ
   if(d === 'MENU'){
-    edit(cid, mid, '🏠 *Главное меню*\n\n💼 Бизнес | 📚 Учёба | 🏡 Дом | 🤖 AI', mainMenuKbd());
+    edit(cid, mid, '🏠 *Главное меню*\n\n💼 Бизнес | 📚 Учёба | 🏡 Дом | 🤖 AI', mainMenuKbd(userId));
     return;
   }
 
@@ -478,6 +534,41 @@ bot.on('callback_query', async q => {
 
   if(d === 'MENU_HOME'){
     edit(cid, mid, '🏡 *Дом*\n\nСписки и задачи:', homeMenuKbd());
+    return;
+  }
+
+  if(d === 'MENU_NOTES'){
+    edit(cid, mid, '📝 *Заметки*\n\nТвои учебные заметки:', notesMenuKbd());
+    return;
+  }
+
+  if(d === 'MENU_TASKS'){
+    edit(cid, mid, '📂 *Задания*\n\nКурсачи и проекты:', tasksMenuKbd());
+    return;
+  }
+
+  if(d === 'NOTES_LIST'){
+    edit(cid, mid, '📝 *Все заметки*\n\n_Пока пусто. Функция в разработке._', notesMenuKbd());
+    return;
+  }
+
+  if(d === 'NOTES_ADD'){
+    edit(cid, mid, '➕ *Добавить заметку*\n\n_Отправь текст заметки следующим сообщением._\n_Функция в разработке._', notesMenuKbd());
+    return;
+  }
+
+  if(d === 'TASKS_COURSEWORK'){
+    edit(cid, mid, '📋 *Курсачи*\n\n_Пока пусто. Функция в разработке._', tasksMenuKbd());
+    return;
+  }
+
+  if(d === 'TASKS_PROJECTS'){
+    edit(cid, mid, '📁 *Проекты*\n\n_Пока пусто. Функция в разработке._', tasksMenuKbd());
+    return;
+  }
+
+  if(d === 'TASKS_ADD'){
+    edit(cid, mid, '➕ *Добавить задание*\n\n_Отправь описание задания следующим сообщением._\n_Функция в разработке._', tasksMenuKbd());
     return;
   }
 
@@ -535,6 +626,24 @@ bot.on('callback_query', async q => {
 
   if(d === 'SCHEDULE_UPDATE'){
     edit(cid, mid, '⚠️ *Функция временно отключена*\n\nРасписание обновляется вручную каждую неделю.\n\nТекущее расписание актуально.', studyMenuKbd());
+    return;
+  }
+
+  if(d === 'SCHEDULE_CHOOSE_DAY'){
+    edit(cid, mid, '🗓 *Выбери день недели:*', daysMenuKbd());
+    return;
+  }
+
+  if(d.startsWith('SCHEDULE_DAY_')){
+    const dayName = d.replace('SCHEDULE_DAY_', '');
+    const schedule = loadScheduleData();
+    if(!schedule || !schedule.schedule){
+      edit(cid, mid, '❌ Расписание не загружено.\n\nНажми "🔄 Обновить расписание"', studyMenuKbd());
+      return;
+    }
+    const lessons = scheduleParser.getScheduleForDay(schedule, dayName);
+    const text = scheduleParser.formatSchedule(lessons, `📅 ${dayName}`);
+    edit(cid, mid, text, daysMenuKbd());
     return;
   }
 
