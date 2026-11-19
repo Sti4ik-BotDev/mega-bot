@@ -886,6 +886,50 @@ cron.schedule('0 7 * * *', async () => {
   }
 });
 
+// ========== АВТОМАТИЧЕСКАЯ ОТПРАВКА НАПОМИНАНИЙ ==========
+// Проверяем каждую минуту
+cron.schedule('* * * * *', async () => {
+  try {
+    const reminders = loadReminders();
+    const now = new Date();
+    
+    // Находим напоминания, которые пора отправить
+    const dueReminders = reminders.reminders.filter(r => {
+      if (r.completed) return false;
+      const reminderTime = new Date(r.time);
+      return reminderTime <= now;
+    });
+    
+    if (dueReminders.length === 0) return;
+    
+    // Отправляем каждое напоминание
+    for (const reminder of dueReminders) {
+      const recipientId = reminder.for === 'Мартин' ? MARTIN_ID : LENA_ID;
+      
+      try {
+        await bot.sendMessage(recipientId, 
+          `⏰ *Напоминание!*\n\n${reminder.text}\n\n_От: ${reminder.from}_`,
+          { parse_mode: 'Markdown' }
+        );
+        
+        console.log(`✅ Напоминание отправлено: ${reminder.text} → ${reminder.for}`);
+        
+        // Отмечаем как выполненное
+        reminder.completed = true;
+      } catch (err) {
+        console.error(`❌ Ошибка отправки напоминания ${reminder.id}:`, err.message);
+      }
+    }
+    
+    // Сохраняем обновлённые напоминания
+    if (dueReminders.length > 0) {
+      saveReminders(reminders);
+    }
+  } catch (err) {
+    console.error('❌ Ошибка проверки напоминаний:', err.message);
+  }
+});
+
 bot.on('polling_error', e => {
   console.error('polling_error:', e.message);
   // Не падаем при ошибках polling
