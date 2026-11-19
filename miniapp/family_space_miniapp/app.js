@@ -347,65 +347,129 @@ window.toggleReminder = async (id, completed) => {
 };
 
 window.addReminder = async () => {
-  if (window.activeReminderTab === 'notes') {
-    const text = prompt('Текст записки:');
-    if (!text) return;
-    
-    const from = prompt('От кого? (Мартин/Лена)', 'Мартин');
-    const to = prompt('Кому? (Мартин/Лена)', from === 'Мартин' ? 'Лена' : 'Мартин');
-    
-    haptic();
+  showReminderModal();
+};
+
+// Показать модальное окно для добавления
+function showReminderModal() {
+  const isNote = window.activeReminderTab === 'notes';
+  
+  const modalHTML = `
+    <div class="modal-overlay show" id="reminderModal" onclick="if(event.target === this) hideReminderModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">${isNote ? '💕 Новая записка' : '⏰ Новое напоминание'}</h3>
+        </div>
+        <div class="modal-body">
+          <form id="reminderForm">
+            <div class="form-group">
+              <label class="form-label">Текст ${isNote ? 'записки' : 'напоминания'}</label>
+              <textarea class="form-textarea" name="text" required placeholder="${isNote ? 'Например: Люблю тебя ❤️' : 'Например: Оплатить электричество'}"></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">${isNote ? 'От кого' : 'Для кого'}</label>
+                <select class="form-select" name="${isNote ? 'from' : 'for'}" required>
+                  <option value="Мартин">Мартин</option>
+                  <option value="Лена">Лена</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">${isNote ? 'Кому' : 'От кого'}</label>
+                <select class="form-select" name="${isNote ? 'to' : 'from'}" required>
+                  <option value="Лена">Лена</option>
+                  <option value="Мартин">Мартин</option>
+                </select>
+              </div>
+            </div>
+            
+            ${!isNote ? `
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Через сколько дней</label>
+                  <input class="form-input" type="number" name="days" min="0" value="0" required>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Время</label>
+                  <input class="form-input" type="time" name="time" value="12:00" required>
+                </div>
+              </div>
+            ` : ''}
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideReminderModal()">Отмена</button>
+          <button class="btn btn-primary" onclick="submitReminderForm()">Добавить</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function hideReminderModal() {
+  const modal = document.getElementById('reminderModal');
+  if (modal) modal.remove();
+}
+
+async function submitReminderForm() {
+  const form = document.getElementById('reminderForm');
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  
+  const formData = new FormData(form);
+  const isNote = window.activeReminderTab === 'notes';
+  
+  haptic();
+  
+  if (isNote) {
     await fetch(`${API_BASE}/api/notes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, from, to })
+      body: JSON.stringify({
+        text: formData.get('text'),
+        from: formData.get('from'),
+        to: formData.get('to')
+      })
     });
-    
-    const data = await fetch(`${API_BASE}/api/reminders`).then(r => r.json());
-    window.remindersData = data;
-    renderReminders();
     toast('Записка добавлена 💕');
   } else {
-    const text = prompt('Текст напоминания:');
-    if (!text) return;
+    const days = parseInt(formData.get('days')) || 0;
+    const timeStr = formData.get('time');
     
-    const forWho = prompt('Для кого? (Мартин/Лена)', 'Мартин');
-    if (!forWho) return;
-    
-    const from = prompt('От кого?', forWho === 'Мартин' ? 'Лена' : 'Мартин');
-    if (!from) return;
-    
-    const daysStr = prompt('Через сколько дней? (0 = сегодня, 1 = завтра, 2 = послезавтра...)', '0');
-    if (daysStr === null) return;
-    const days = parseInt(daysStr) || 0;
-    
-    const timeStr = prompt('Во сколько? (формат: ЧЧ:ММ, например 14:30)', '12:00');
-    if (!timeStr) return;
-    
-    // Создаём дату
     const reminderDate = new Date();
     reminderDate.setDate(reminderDate.getDate() + days);
     const [hours, minutes] = timeStr.split(':').map(n => parseInt(n) || 0);
     reminderDate.setHours(hours, minutes, 0, 0);
     
-    haptic();
     await fetch(`${API_BASE}/api/reminders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        text, 
-        for: forWho, 
-        from, 
+      body: JSON.stringify({
+        text: formData.get('text'),
+        for: formData.get('for'),
+        from: formData.get('from'),
         time: reminderDate.toISOString()
       })
     });
-    
-    const data = await fetch(`${API_BASE}/api/reminders`).then(r => r.json());
-    window.remindersData = data;
-    renderReminders();
     toast('Напоминание добавлено ⏰');
   }
-};
+  
+  hideReminderModal();
+  
+  const data = await fetch(`${API_BASE}/api/reminders`).then(r => r.json());
+  window.remindersData = data;
+  renderReminders();
+}
+
+window.hideReminderModal = hideReminderModal;
+window.submitReminderForm = submitReminderForm;
 
 // ========== СТРАНИЦА РАСПИСАНИЯ ==========
 async function schedulePage() {
