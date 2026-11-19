@@ -109,7 +109,7 @@ const PAGE = 7;
 function mainMenuKbd(userId) {
   const miniAppUrl = process.env.RAILWAY_PUBLIC_DOMAIN 
     ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
-    : 'https://mega-bot-production.up.railway.app'; // fallback
+    : 'https://mega-bot-production-347d94a8.up.railway.app'; // fallback
   
   // Меню для Мартина
   if (userId === MARTIN_ID) {
