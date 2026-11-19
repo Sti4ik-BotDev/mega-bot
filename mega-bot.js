@@ -15,11 +15,19 @@ try {
   config.YANDEX_SCHEDULE_URL = envContent.match(/YANDEX_SCHEDULE_URL=(.+)/)?.[1]?.trim();
   config.STUDENT_GROUP = envContent.match(/STUDENT_GROUP=(.+)/)?.[1]?.trim() || 'ТП1-926';
 } catch(e) {
-  config.TOKEN = process.env.TOKEN;
-  config.YANDEX_TOKEN = process.env.YANDEX_TOKEN;
-  config.YANDEX_SCHEDULE_URL = process.env.YANDEX_SCHEDULE_URL;
-  config.STUDENT_GROUP = process.env.STUDENT_GROUP || 'ТП1-926';
+  config.TOKEN = process.env.TOKEN?.trim();
+  config.YANDEX_TOKEN = process.env.YANDEX_TOKEN?.trim();
+  config.YANDEX_SCHEDULE_URL = process.env.YANDEX_SCHEDULE_URL?.trim();
+  config.STUDENT_GROUP = process.env.STUDENT_GROUP?.trim() || 'ТП1-926';
 }
+
+// Проверка токена
+if (!config.TOKEN) {
+  console.error('❌ ОШИБКА: TOKEN не найден!');
+  console.error('Проверь переменные окружения на Railway');
+  process.exit(1);
+}
+console.log('✅ TOKEN загружен:', config.TOKEN.substring(0, 10) + '...');
 
 // Файлы данных
 const CLIENTS_FILE = path.join(__dirname, 'clients.json');
