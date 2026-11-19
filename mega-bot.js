@@ -928,13 +928,24 @@ app.get('/api/schedule', (req, res) => {
     return res.json({ schedule: [] });
   }
   
-  // Преобразуем в формат Mini App
+  // Преобразуем в формат Mini App с реальными датами
   const days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+  
+  // Вычисляем даты текущей недели
+  const now = new Date();
+  const currentDay = now.getDay(); // 0 = воскресенье, 1 = понедельник, ...
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Смещение до понедельника
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + mondayOffset);
+  
   const formatted = days.map((day, index) => {
     const lessons = scheduleParser.getScheduleForDay(scheduleData, day);
+    const currentDate = new Date(monday);
+    currentDate.setDate(monday.getDate() + index);
+    
     return {
       day: day.substring(0, 2).toUpperCase(),
-      date: String(18 + index), // Упрощённо
+      date: String(currentDate.getDate()), // Реальная дата
       classes: lessons.map(l => ({
         time: l.time,
         title: l.subject,
