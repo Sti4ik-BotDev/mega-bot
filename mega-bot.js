@@ -978,6 +978,159 @@ app.get('/api/user/:id', (req, res) => {
   }
 });
 
+// ========== HELPER FUNCTIONS ДЛЯ JSON ФАЙЛОВ ==========
+function loadShopping() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'shopping.json'), 'utf8'));
+  } catch(e) {
+    return { items: [] };
+  }
+}
+
+function saveShopping(data) {
+  fs.writeFileSync(path.join(__dirname, 'shopping.json'), JSON.stringify(data, null, 2));
+}
+
+function loadUtilities() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'utilities.json'), 'utf8'));
+  } catch(e) {
+    return { bills: [] };
+  }
+}
+
+function saveUtilities(data) {
+  fs.writeFileSync(path.join(__dirname, 'utilities.json'), JSON.stringify(data, null, 2));
+}
+
+function loadReminders() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'reminders.json'), 'utf8'));
+  } catch(e) {
+    return { reminders: [], notes: [] };
+  }
+}
+
+function saveReminders(data) {
+  fs.writeFileSync(path.join(__dirname, 'reminders.json'), JSON.stringify(data, null, 2));
+}
+
+// ========== API: ПОКУПКИ ==========
+// Получить список покупок
+app.get('/api/shopping', (req, res) => {
+  const data = loadShopping();
+  res.json(data);
+});
+
+// Добавить покупку
+app.post('/api/shopping', (req, res) => {
+  const data = loadShopping();
+  const newItem = {
+    id: Date.now(),
+    name: req.body.name,
+    bought: false,
+    addedBy: req.body.addedBy || 'Неизвестно',
+    addedAt: new Date().toISOString()
+  };
+  data.items.push(newItem);
+  saveShopping(data);
+  res.json(newItem);
+});
+
+// Отметить покупку как купленную/некупленную
+app.put('/api/shopping/:id', (req, res) => {
+  const data = loadShopping();
+  const item = data.items.find(i => i.id === parseInt(req.params.id));
+  if (item) {
+    item.bought = req.body.bought;
+    saveShopping(data);
+    res.json(item);
+  } else {
+    res.status(404).json({ error: 'Item not found' });
+  }
+});
+
+// Удалить покупку
+app.delete('/api/shopping/:id', (req, res) => {
+  const data = loadShopping();
+  data.items = data.items.filter(i => i.id !== parseInt(req.params.id));
+  saveShopping(data);
+  res.json({ success: true });
+});
+
+// ========== API: КОММУНАЛКА ==========
+// Получить список платежей
+app.get('/api/utilities', (req, res) => {
+  const data = loadUtilities();
+  res.json(data);
+});
+
+// Отметить платёж как оплаченный
+app.put('/api/utilities/:id', (req, res) => {
+  const data = loadUtilities();
+  const bill = data.bills.find(b => b.id === parseInt(req.params.id));
+  if (bill) {
+    bill.paidBy = req.body.paidBy;
+    bill.paidAt = new Date().toISOString();
+    bill.status = 'paid';
+    saveUtilities(data);
+    res.json(bill);
+  } else {
+    res.status(404).json({ error: 'Bill not found' });
+  }
+});
+
+// ========== API: НАПОМИНАНИЯ И ЗАПИСКИ ==========
+// Получить все напоминания и записки
+app.get('/api/reminders', (req, res) => {
+  const data = loadReminders();
+  res.json(data);
+});
+
+// Добавить напоминание
+app.post('/api/reminders', (req, res) => {
+  const data = loadReminders();
+  const newReminder = {
+    id: Date.now(),
+    text: req.body.text,
+    time: req.body.time,
+    for: req.body.for,
+    from: req.body.from,
+    completed: false
+  };
+  data.reminders.push(newReminder);
+  saveReminders(data);
+  res.json(newReminder);
+});
+
+// Добавить записку
+app.post('/api/notes', (req, res) => {
+  const data = loadReminders();
+  const newNote = {
+    id: Date.now(),
+    text: req.body.text,
+    from: req.body.from,
+    to: req.body.to,
+    createdAt: new Date().toISOString()
+  };
+  data.notes.push(newNote);
+  saveReminders(data);
+  res.json(newNote);
+});
+
+// Отметить напоминание как выполненное
+app.put('/api/reminders/:id', (req, res) => {
+  const data = loadReminders();
+  const reminder = data.reminders.find(r => r.id === parseInt(req.params.id));
+  if (reminder) {
+    reminder.completed = req.body.completed;
+    saveReminders(data);
+    res.json(reminder);
+  } else {
+    res.status(404).json({ error: 'Reminder not found' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🌐 Веб-сервер запущен на порту ${PORT}`);

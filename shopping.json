@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Молоко",
+      "bought": false,
+      "addedBy": "Мартин",
+      "addedAt": "2026-11-19T15:30:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Хлеб",
+      "bought": false,
+      "addedBy": "Лена",
+      "addedAt": "2026-11-19T16:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Яйца",
+      "bought": true,
+      "addedBy": "Мартин",
+      "addedAt": "2026-11-18T10:00:00Z"
+    }
+  ]
+}

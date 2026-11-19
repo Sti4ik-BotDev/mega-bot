@@ -1,0 +1,40 @@
+{
+  "bills": [
+    {
+      "id": 1,
+      "name": "Электричество",
+      "amount": 2500,
+      "dueDate": "2026-11-25",
+      "paidBy": null,
+      "paidAt": null,
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "name": "Интернет",
+      "amount": 800,
+      "dueDate": "2026-11-20",
+      "paidBy": "Мартин",
+      "paidAt": "2026-11-15T12:00:00Z",
+      "status": "paid"
+    },
+    {
+      "id": 3,
+      "name": "Вода",
+      "amount": 1200,
+      "dueDate": "2026-11-28",
+      "paidBy": null,
+      "paidAt": null,
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "Газ",
+      "amount": 1500,
+      "dueDate": "2026-11-22",
+      "paidBy": null,
+      "paidAt": null,
+      "status": "pending"
+    }
+  ]
+}
